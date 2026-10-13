@@ -1,70 +1,66 @@
-# ResearchGraph AI
-
-ResearchGraph AI is a local research workspace backed by the existing Neo4j
-Aura graph. The React app reads live graph data through the FastAPI service.
-The earlier Streamlit interface remains available in `app.py`.
-
 ## Run locally on Windows
 
-Open two PowerShell terminals in the project folder and activate the existing
-virtual environment in each:
+### Prerequisites
+
+- Python 3.11 or a compatible version supported by the dependencies.
+- Node.js and npm.
+- Access to a Neo4j Aura database, or another compatible Neo4j instance.
+
+### 1. Download the project
+
+Clone the repository:
 
 ```powershell
-.\.venv\Scripts\Activate.ps1
+git clone https://github.com/vamshi-Narla/ResearchGraph-AI.git
+cd ResearchGraph-AI
 ```
 
-In the first terminal, start the API:
+Alternatively, download the ZIP from GitHub and extract it.
+
+### 2. Set up the Python environment
+
+```powershell
+py -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install --upgrade pip
+pip install -r requirements.txt
+```
+
+### 3. Configure Neo4j
+
+Create a `.env` file in the project root. Add your own Neo4j connection details:
+
+```dotenv
+NEO4J_URI=your_neo4j_uri
+NEO4J_USERNAME=your_neo4j_username
+NEO4J_PASSWORD=your_neo4j_password
+NEO4J_DATABASE=your_neo4j_database
+```
+
+Replace the example values with your own credentials. Never commit `.env` or publish database passwords.
+
+### 4. Install frontend dependencies
+
+Open a second PowerShell terminal in the project root:
+
+```powershell
+cd frontend
+npm install
+npm run dev
+```
+
+### 5. Start the API
+
+In the first terminal, from the project root with the Python environment activated:
 
 ```powershell
 python -m uvicorn api:app --reload --port 8011
 ```
 
-In the second terminal, start Vite:
+Open the frontend at http://localhost:5173.
 
-```powershell
-cd frontend
-npm run dev
-```
+The API documentation is available at http://localhost:8011/docs.
 
-Open <http://localhost:5173>. The API is at <http://localhost:8011>, with
-interactive API documentation at <http://localhost:8011/docs>.
+If the frontend uses a different port, open the local URL printed by Vite in the terminal.
 
-The API reads `NEO4J_URI`, `NEO4J_USERNAME`, `NEO4J_PASSWORD`, and
-`NEO4J_DATABASE` from the root `.env`. Keep that file private and never put
-database credentials in a `VITE_` variable. The optional frontend API base setting is `VITE_API_BASE_URL`; copy
-`frontend/.env.example` to `frontend/.env.local` only if you need to override
-the local default.
-
-## What is implemented
-
-- Overview counts and paper records are queried from Neo4j, not demo constants.
-- Paper search, paper detail, graph browsing, node connections, and bounded
-  graph results use the existing Neo4j records.
-- The research assistant page is transparent database evidence retrieval; it
-  does not call an LLM or search the wider web.
-- Comparisons and candidate research-gap signals are computed only from the
-  indexed graph and its stored properties.
-- Collections are saved in a separate local SQLite file. They do not write to
-  or delete records in Neo4j.
-- CSV and JSON import supports validation and preview only. It does not write
-  previewed records to the graph.
-- The settings view reports real API/database connectivity and available local
-  capabilities. This local app does not implement user authentication.
-
-## Import preview format
-
-Import preview accepts `.csv` files with a header row or `.json` files
-containing one paper object, a list of paper objects, or an object with a
-`papers` list. `title` is required. Recognized optional fields are `id`,
-`abstract`, `year`, `doi`, `source_url`, `domain`, `publication_type`,
-`keywords`, `methodology`, `dataset`, `findings`, and `limitations`.
-Preview is limited to 500 rows and reports validation issues without writing
-to Neo4j.
-
-## Limits
-
-The assistant does evidence retrieval, not generative AI. Gap exploration
-surfaces underrepresented concepts in this graph, not universal claims about
-all published research. Records are displayed as stored; the application does
-not independently verify publication metadata. The local development API is
-not production-secured and should not be exposed to the public internet.
+**Note:** This is a local development setup. The application does not implement user authentication and should not be exposed directly to the public internet.
